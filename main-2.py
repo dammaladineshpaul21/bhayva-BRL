@@ -2,30 +2,27 @@ import requests
 
 
 class MySession:
-
     def __init__(self, url):
         self.url = url
-        self.session = requests.Session()
 
-    def get_something(self):
+    def __enter__(self):
         try:
-            response = requests.get(self.url)
-            # Check for successful GET request
-            if response.status_code == 200:
-                website_text = response.text
-                return website_text
+            self.response = requests.get(self.url)
+            self.response.raise_for_status()
+            return self.response.text
         except Exception:
             return "Invalid URL"
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
-obj1 = MySession("https://traveltriangle.com/blog/texas-restaurants/")
-call_number = 4
-while call_number > 1:
-    if obj1.get_something() != "Invalid URL":
-        print(obj1.get_something())
-        print("API call successful in 1st attempt")
-        break
-    else:
-        obj1.get_something()
-        call_number -= 1
-        print(f"API call successful in 1st attempt {call_number}")
+
+call_number = 3
+while call_number:
+    with MySession("https://www.google.com") as website_text:
+        if website_text != "Invalid URL":
+            print("API Genarated Sussfully")
+            break
+        else:
+            call_number -= 1
+            print(f"API is unsuccesfull in {call_number+1} attempts")
